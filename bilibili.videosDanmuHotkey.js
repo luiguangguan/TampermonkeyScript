@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  在找到指定的input元素后，监听键盘的Ctrl+Shift+D并在按下组合键时让input元素获得焦点（仅适用于B站）
-// @author       You
+// @author       Simon
 // @icon         https://www.bilibili.com/favicon.ico
 // @match        https://www.bilibili.com/*
 // @grant        none

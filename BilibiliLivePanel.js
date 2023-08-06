@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  Add a control panel to Bilibili Live page using Bootstrap.
-// @author       You
+// @author       Simon
 // @match        https://live.bilibili.com/*
 // @grant        GM_registerMenuCommand
 // @grant        GM_unregisterMenuCommand
@@ -283,11 +283,9 @@
 					this.cmdPanelVisible = true;
 				},
 				handleCloseEditPane(done) {
-					debugger;
 					done();
 				},
 				handleCloseCmdPanel(done) {
-					debugger;
 					done();
 				},
 				changeMessage() {
@@ -357,7 +355,6 @@
 						}
 					}
 					this.elements.splice(toIndex, 0, this.elements.splice(fromIndex, 1)[0]);
-					debugger
 					this.elements[toIndex].mved = "mved";
 					setTimeout(function (that) {
 						that.elements[toIndex].mved = "";
@@ -377,5 +374,25 @@
 		GM_registerMenuCommand('#️⃣ 打开配置面板', function () {
 			vueObj.openEditPanel();
 		});
+
+		function handleKeyDown(event) {
+			// 检查是否按下了 Ctrl+Shift+D 组合键
+			//if (event.ctrlKey && event.shiftKey &&( event.key === 'f'|| event.key === 'F')) {
+			if (( event.key.toLocaleUpperCase() === 'P')) {
+				if(event.ctrlKey||event.shiftKey||event.altKey||event.winKey||event.metaKey){
+					console.log("按下了控制键")
+					return;
+				}
+				if(document.activeElement === document.querySelector('textarea.chat-input')){
+					return;
+				}
+				console.log("按下键盘");
+				event.preventDefault();
+				if(vueObj){
+					vueObj.openCmdPanel();
+				}
+			}
+		}
+		document.addEventListener('keydown', handleKeyDown);
 	}
 })();
