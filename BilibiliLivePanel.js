@@ -69,6 +69,11 @@
 			background-color: #2b46ff40;
 		}
 
+		.custom-dialog .el-dialog__wrapper {
+			transition: background-color 0.5s; /* 添加渐变过渡效果 */
+			background-color: rgba(0, 0, 0, 0.5); /* 设置初始透明度，这里是50% */
+		}
+
     `;
 
 	/**
@@ -128,6 +133,8 @@
 	document.head.appendChild(customStyles);
 
 	var config = GM_getValue("config");
+	var cmdOpacity = GM_getValue("cmdOpacity");
+
 	if (!config) {
 		config = [];
 	}
@@ -204,30 +211,28 @@
 			</div>
 		</el-dialog>
 
-		<el-dialog title="命令面板" :visible.sync="cmdPanelVisible" width="50%" :before-close="handleCloseCmdPanel">
-			<div style=" flex-wrap: wrap;width:100%">
-				<div v-for="(item, index) in elements" :key="index" class="row">
-					<el-card :class="['color' + index%2 + getValDefaultEmpty(item.mved)]">
-						<el-row>
-							<el-col :span="16">
-								<el-row>
-									<el-col :span="12">{{item.fixedMsg}}</el-col>
-									<el-col :span="12" v-if="item.input">
-										<el-input v-model="item.msg" style="min-width:100px"
-											placeholder="附加指令"></el-input>
-									</el-col>
-								</el-row>
-							</el-col>
-							<el-col :span="8">
-								<div style="padding-left:8px">
-									<el-button type="primary" @click="sendMsg(item)">{{item.title}}</button>
-								</div>
-							</el-col>
-						</el-row>
-					</el-card>
-				</div>
-			<div>
-		</el-dialog>
+		<el-dialog title="命令面板" :visible.sync="cmdPanelVisible" width="60%" :before-close="handleCloseCmdPanel" custom-class="custom-dialog" >
+		<div >
+			<el-row>
+				<el-col :span="6">
+					<label>透明度</label>
+				</el-col>
+				<el-col>
+				<el-slider v-model="cmdOpacity" :min="0" :max="1" :step="0.01" @change="updateDialogOpacity"></el-slider>
+				</el-col>
+			</el-row>
+			<el-form :inline="true" style="display: flex; flex-wrap: wrap;">
+					<div v-for="(item, index) in elements" :key="index" class="row">
+						<el-card :class="['color' + index%2 + getValDefaultEmpty(item.mved)]">
+								<el-form-item :label="item.fixedMsg">
+									<el-input  v-if="item.input" v-model="item.msg" placeholder="附加指令"></el-input>
+								</el-form-item>
+							<el-button type="primary" @click="sendMsg(item)">{{item.title}}</button>
+						</el-card>
+					</div>
+			</el-form>
+		<div>
+	</el-dialog>
     `;
 		document.body.appendChild(vueDiv);
 		// const bodyParent = document.body.parentNode;
@@ -248,6 +253,7 @@
 				hasinput: false,
 				hasbtn: false,
 				isClear: false,
+				cmdOpacity: 1,
 				elements: [{
 					title: "切歌",
 					msg: "信息",
@@ -264,11 +270,24 @@
 			mounted: function () {
 				// Vue 初始化完成后执行的代码
 				this.elements = config;
+				try{
+					this.cmdOpacity =parseFloat(cmdOpacity);
+					this.updateDialogOpacity();
+				}catch(error){
+					console.error(error);
+				}
 				this.$nextTick(function () {
 					// Vue 更新 DOM 后执行的代码
 				});
 			},
 			methods: {
+				updateDialogOpacity() {
+					const dialogWrapper = document.querySelector('.custom-dialog');
+					if (dialogWrapper) {
+						dialogWrapper.style.backgroundColor = `rgba(255, 255, 255, ${this.cmdOpacity})`;
+					}
+					GM_setValue("cmdOpacity", cmdOpacity);
+				},
 				getValDefaultEmpty(val) {
 					if (val) {
 						return val;
@@ -359,8 +378,8 @@
 					setTimeout(function (that) {
 						that.elements[toIndex].mved = "";
 						that.$forceUpdate();
-						console.log(that.elements[toIndex].mved );
-					}, 500,this);
+						console.log(that.elements[toIndex].mved);
+					}, 500, this);
 
 				}
 			}
@@ -378,17 +397,17 @@
 		function handleKeyDown(event) {
 			// 检查是否按下了 Ctrl+Shift+D 组合键
 			//if (event.ctrlKey && event.shiftKey &&( event.key === 'f'|| event.key === 'F')) {
-			if (( event.key.toLocaleUpperCase() === 'P')) {
-				if(event.ctrlKey||event.shiftKey||event.altKey||event.winKey||event.metaKey){
+			if (event.key.toLocaleUpperCase() === 'P' && event.altKey) {
+				if (event.ctrlKey || event.shiftKey || event.winKey || event.metaKey) {
 					console.log("按下了控制键")
 					return;
 				}
-				if(document.activeElement === document.querySelector('textarea.chat-input')){
+				if (document.activeElement === document.querySelector('textarea.chat-input')) {
 					return;
 				}
 				console.log("按下键盘");
 				event.preventDefault();
-				if(vueObj){
+				if (vueObj) {
 					vueObj.openCmdPanel();
 				}
 			}
