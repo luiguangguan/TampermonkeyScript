@@ -402,9 +402,9 @@
 					console.log("按下了控制键")
 					return;
 				}
-				if (document.activeElement === document.querySelector('textarea.chat-input')) {
-					return;
-				}
+				// if (document.activeElement === document.querySelector('textarea.chat-input')) {
+				// 	return;
+				// }
 				console.log("按下键盘");
 				event.preventDefault();
 				if (vueObj) {
