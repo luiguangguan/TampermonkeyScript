@@ -227,6 +227,10 @@
 								<el-form-item :label="item.fixedMsg">
 									<el-input  v-if="item.input" v-model="item.msg" placeholder="附加指令"></el-input>
 								</el-form-item>
+
+								<label v-if="item.msg.length + item.fixedMsg.length <= 20 && item.input">字数：{{item.msg.length + item.fixedMsg.length}}</label>
+								<label v-if="item.msg.length + item.fixedMsg.length > 20 && item.input" style="color:#F00">字数：{{item.msg.length + item.fixedMsg.length}}</label>
+
 							<el-button type="primary" @click="sendMsg(item)">{{item.title}}</button>
 						</el-card>
 					</div>
